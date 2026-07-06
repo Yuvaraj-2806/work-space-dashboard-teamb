@@ -5,6 +5,7 @@ import {
   setRoleFilter,
   setSearchQuery,
   setStatusFilter,
+  setLocationFilter,
   setDateRange,
   resetFilters,
   fetchDashboardData,
@@ -58,6 +59,13 @@ export const useDashboard = () => {
     [dispatch]
   );
 
+  const changeLocation = useCallback(
+    (location: string) => {
+      dispatch(setLocationFilter(location));
+    },
+    [dispatch]
+  );
+
   const changeDateRange = useCallback(
     (startDate: string | null, endDate: string | null) => {
       dispatch(setDateRange({ startDate, endDate }));
@@ -104,6 +112,7 @@ export const useDashboard = () => {
     loadData,
     changeDepartment,
     changeRole,
+    changeLocation,
     changeSearchQuery,
     changeStatus,
     changeDateRange,

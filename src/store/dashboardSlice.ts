@@ -11,6 +11,7 @@ export interface Employee {
   status: 'Active' | 'Inactive';
   joinedDate: string; // ISO date string (YYYY-MM-DD)
   avatar: string;
+  location?: string;
 }
 
 export interface DateRange {
@@ -21,6 +22,7 @@ export interface DateRange {
 export interface DashboardFilters {
   department: string;
   role: string;
+  location: string;
   searchQuery: string;
   status: 'All' | 'Active' | 'Inactive';
   dateRange: DateRange;
@@ -55,7 +57,8 @@ export const mockEmployees: Employee[] = [
     role: "Frontend Engineer",
     status: "Active",
     joinedDate: "2025-01-15",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sanjay"
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sanjay",
+    location: "Chennai"
   },
   {
     id: "EMP-002",
@@ -65,7 +68,8 @@ export const mockEmployees: Employee[] = [
     role: "Backend Engineer",
     status: "Active",
     joinedDate: "2024-03-12",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rohith"
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rohith",
+    location: "Bangalore"
   },
   {
     id: "EMP-003",
@@ -75,7 +79,8 @@ export const mockEmployees: Employee[] = [
     role: "Fullstack Engineer",
     status: "Active",
     joinedDate: "2024-08-20",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Dhoni"
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Dhoni",
+    location: "Hyderabad"
   },
   {
     id: "EMP-004",
@@ -85,7 +90,8 @@ export const mockEmployees: Employee[] = [
     role: "Product Designer",
     status: "Active",
     joinedDate: "2025-05-10",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Virat"
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Virat",
+    location: "Pune"
   },
   {
     id: "EMP-005",
@@ -95,13 +101,15 @@ export const mockEmployees: Employee[] = [
     role: "Product Manager",
     status: "Active",
     joinedDate: "2023-11-01",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hardik"
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hardik",
+    location: "Bangalore"
   }
 ];
 
 const initialFilters: DashboardFilters = {
   department: 'All',
   role: 'All',
+  location: 'All',
   searchQuery: '',
   status: 'All',
   dateRange: {
@@ -131,7 +139,7 @@ const initialState: DashboardState = {
 
 // Helper function to filter employees list and compute stats
 const applyFiltersAndCalculateStats = (state: DashboardState) => {
-  const { department, role, searchQuery, status, dateRange } = state.filters;
+  const { department, role, location, searchQuery, status, dateRange } = state.filters;
 
   // 1. Filter logic
   let filtered = [...state.employees];
@@ -145,6 +153,12 @@ const applyFiltersAndCalculateStats = (state: DashboardState) => {
   if (role && role !== 'All') {
     filtered = filtered.filter(
       (emp) => emp.role.toLowerCase() === role.toLowerCase()
+    );
+  }
+
+  if (location && location !== 'All') {
+    filtered = filtered.filter(
+      (emp) => emp.location && emp.location.toLowerCase() === location.toLowerCase()
     );
   }
 
@@ -282,6 +296,10 @@ const dashboardSlice = createSlice({
       state.filters.status = action.payload;
       applyFiltersAndCalculateStats(state);
     },
+    setLocationFilter: (state, action: PayloadAction<string>) => {
+      state.filters.location = action.payload;
+      applyFiltersAndCalculateStats(state);
+    },
     setDateRange: (state, action: PayloadAction<DateRange>) => {
       state.filters.dateRange = action.payload;
       applyFiltersAndCalculateStats(state);
@@ -302,6 +320,7 @@ const dashboardSlice = createSlice({
         id: formattedId,
         joinedDate: action.payload.joinedDate || dayjs().format('YYYY-MM-DD'),
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${action.payload.name}`,
+        location: (action.payload as any).location || 'Bangalore',
       };
       state.employees.push(newEmp);
       applyFiltersAndCalculateStats(state);
@@ -344,6 +363,7 @@ export const {
   setRoleFilter,
   setSearchQuery,
   setStatusFilter,
+  setLocationFilter,
   setDateRange,
   resetFilters,
   addEmployee,

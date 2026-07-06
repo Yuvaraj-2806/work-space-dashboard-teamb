@@ -6,6 +6,11 @@ import * as yup from 'yup';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import DashboardFilter from './components/Filters/DashboardFilter';
+import DepartmentWidget from './components/Widgets/DepartmentWidget';
+import RoleWidget from './components/Widgets/RoleWidget';
+import EmployeeSummary from './components/Widgets/EmployeeSummary';
+
 import { store } from './store';
 import { useDashboard } from './hooks/useDashboard';
 import './index.css';
@@ -60,6 +65,10 @@ const departmentRoles: Record<string, string[]> = {
   HR: ['HR Manager', 'Talent Acquisition Specialist'],
 };
 
+
+
+
+
 function DashboardTester() {
   const {
     filteredEmployees,
@@ -76,6 +85,19 @@ function DashboardTester() {
     addNewEmployee,
     removeEmployee,
   } = useDashboard();
+
+  // Map distribution stats to widget props
+  const departmentsData = stats.departmentDistribution.map((item, index) => ({
+    id: index,
+    department: item.name,
+    employees: item.value,
+  }));
+
+  const rolesData = stats.roleDistribution.map((item, index) => ({
+    id: index,
+    role: item.name,
+    employees: item.value,
+  }));
 
   // Local state for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -141,29 +163,15 @@ function DashboardTester() {
 
   return (
     <>
-      <div className="animate-fade-in" style={{ padding: '40px 48px', minHeight: '100vh', maxWidth: 1280, margin: '0 auto' }}>
+      <div className="animate-fade-in" style={{ padding: '0px 48px 40px 48px', maxWidth: 1280, margin: '0 auto' }}>
         
         {/* Header Section */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
           <h1 className="page-title">Dashboard State</h1>
           
           <button
             className="btn-primary"
             onClick={() => setIsModalOpen(true)}
-            style={{
-              padding: '12px 22px',
-              backgroundColor: '#2563eb',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontSize: 14,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.1)'
-            }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -254,48 +262,28 @@ function DashboardTester() {
           </div>
         </div>
 
+        {/* Widgets Row */}
+        <div className="dashboard">
+          <DepartmentWidget departments={departmentsData} />
+          <RoleWidget roles={rolesData} />
+        </div>
+
+        {/* Employee Summary Section */}
+        <EmployeeSummary />
+
         {/* Filter Controls Row */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 16,
-            marginBottom: 32,
-            padding: 20,
-            backgroundColor: 'rgba(255, 255, 255, 0.75)',
-            backdropFilter: 'blur(8px)',
-            borderRadius: 12,
-            border: '1px solid rgba(226, 232, 240, 0.7)',
-            alignItems: 'center'
-          }}
-        >
+        <div className="filter-container">
           <input
             type="text"
             className="filter-input"
             placeholder="Search by name, role, dept..."
             value={filters.searchQuery}
             onChange={(e) => changeSearchQuery(e.target.value)}
-            style={{
-              padding: '10px 14px',
-              borderRadius: 8,
-              border: '1px solid #cbd5e1',
-              width: 280,
-              fontSize: 14,
-              backgroundColor: '#fff'
-            }}
           />
           <select
             className="filter-select"
             value={filters.department}
             onChange={(e) => changeDepartment(e.target.value)}
-            style={{
-              padding: '10px 14px',
-              borderRadius: 8,
-              border: '1px solid #cbd5e1',
-              fontSize: 14,
-              backgroundColor: '#fff',
-              cursor: 'pointer'
-            }}
           >
             <option value="All">All Departments</option>
             <option value="Engineering">Engineering</option>
@@ -309,14 +297,6 @@ function DashboardTester() {
             className="filter-select"
             value={filters.role}
             onChange={(e) => changeRole(e.target.value)}
-            style={{
-              padding: '10px 14px',
-              borderRadius: 8,
-              border: '1px solid #cbd5e1',
-              fontSize: 14,
-              backgroundColor: '#fff',
-              cursor: 'pointer'
-            }}
           >
             <option value="All">All Roles</option>
             <option value="Frontend Engineer">Frontend Engineer</option>
@@ -342,14 +322,6 @@ function DashboardTester() {
             onChange={(e) =>
               changeStatus(e.target.value as 'All' | 'Active' | 'Inactive')
             }
-            style={{
-              padding: '10px 14px',
-              borderRadius: 8,
-              border: '1px solid #cbd5e1',
-              fontSize: 14,
-              backgroundColor: '#fff',
-              cursor: 'pointer'
-            }}
           >
             <option value="All">All Statuses</option>
             <option value="Active">Active</option>
@@ -358,20 +330,7 @@ function DashboardTester() {
           
           <button
             onClick={resetAllFilters}
-            style={{
-              padding: '10px 18px',
-              borderRadius: 8,
-              border: '1px solid #cbd5e1',
-              fontSize: 14,
-              cursor: 'pointer',
-              backgroundColor: '#f1f5f9',
-              fontWeight: 600,
-              color: '#475569',
-              marginLeft: 'auto',
-              transition: 'all 0.2s'
-            }}
-            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#e2e8f0'; }}
-            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
+            className="filter-btn-reset"
           >
             Reset Filters
           </button>
@@ -653,6 +612,7 @@ function DashboardTester() {
 export default function App() {
   return (
     <Provider store={store}>
+      <DashboardFilter />
       <DashboardTester />
     </Provider>
   );
